@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<!-- saved from url=(0040)https://web-sandbox.oaiusercontent.com/? -->
+<html lang="hu"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élő szöveg – interaktív infografika</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121a31;
+    --panel2:#182344;
+    --text:#eef3ff;
+    --muted:#a9b4d0;
+    --accent:#7dd3fc;
+    --accent2:#c084fc;
+    --accent3:#34d399;
+    --warn:#f59e0b;
+    --danger:#fb7185;
+    --line:rgba(255,255,255,.12);
+    --glow:0 0 0 1px rgba(255,255,255,.05), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(125,211,252,.12), transparent 30%),
+      radial-gradient(circle at 80% 15%, rgba(192,132,252,.10), transparent 28%),
+      radial-gradient(circle at 50% 80%, rgba(52,211,153,.08), transparent 28%),
+      linear-gradient(180deg, #0a0f1d 0%, #0b1020 100%);
+    min-height:100vh;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 20px 42px}
+  .hero{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:22px;
+    align-items:stretch;
+    margin-bottom:22px;
+  }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow:var(--glow);
+    backdrop-filter: blur(8px);
+  }
+  .hero-main{padding:28px}
+  .eyebrow{
+    display:inline-flex; gap:8px; align-items:center;
+    color:var(--accent); font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px;
+    padding:8px 12px; border-radius:999px; background:rgba(125,211,252,.08); border:1px solid rgba(125,211,252,.14);
+  }
+  h1{
+    font-size: clamp(34px, 5vw, 62px);
+    line-height:1.02;
+    margin:16px 0 14px;
+    letter-spacing:-0.03em;
+  }
+  .lead{
+    font-size:clamp(17px, 2vw, 21px);
+    line-height:1.45;
+    color:var(--muted);
+    max-width: 42ch;
+  }
+  .hero-side{padding:22px; display:flex; flex-direction:column; gap:14px}
+  .mini{
+    padding:16px 16px 14px; border-radius:18px; background:rgba(255,255,255,.03); border:1px solid var(--line);
+  }
+  .mini h3{margin:0 0 8px; font-size:14px; color:#dbeafe; text-transform:uppercase; letter-spacing:.06em}
+  .mini p{margin:0; color:var(--muted); line-height:1.45}
+  .grid{
+    display:grid;
+    grid-template-columns: 460px 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  .controls{padding:22px; position:sticky; top:16px}
+  .panel-title{
+    margin:0 0 6px; font-size:22px; letter-spacing:-.02em;
+  }
+  .panel-sub{
+    color:var(--muted); margin:0 0 18px; line-height:1.45; font-size:15px;
+  }
+  .group{margin:18px 0 20px}
+  .group label.top{
+    display:block; font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:#c7d2fe; margin-bottom:10px;
+  }
+  .segmented{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  }
+  .segmented button{
+    appearance:none; border:none; cursor:pointer;
+    background:#16213f; color:#dbeafe; padding:12px 10px; border-radius:14px;
+    border:1px solid var(--line); font-weight:700; font-size:14px; transition:.2s ease;
+  }
+  .segmented button.active{
+    background:linear-gradient(180deg, rgba(125,211,252,.18), rgba(125,211,252,.08));
+    border-color:rgba(125,211,252,.38);
+    color:white;
+    transform:translateY(-1px);
+  }
+  .slider-row{margin:12px 0}
+  .slider-head{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; font-size:14px;
+  }
+  .slider-head span:last-child{color:var(--accent)}
+  input[type=range]{width:100%}
+  .pillbar{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .pill{
+    padding:8px 10px; border-radius:999px; font-size:12px; color:#dbeafe;
+    border:1px solid var(--line); background:rgba(255,255,255,.03)
+  }
+  .live{
+    padding:22px;
+    display:grid;
+    gap:20px;
+  }
+  .topline{
+    display:flex; justify-content:space-between; gap:16px; align-items:end; flex-wrap:wrap;
+  }
+  .topline h2{margin:0; font-size:26px; letter-spacing:-.02em}
+  .legend{display:flex; gap:10px; flex-wrap:wrap}
+  .legend span{
+    display:inline-flex; align-items:center; gap:7px; color:var(--muted); font-size:13px;
+  }
+  .dot{width:10px;height:10px;border-radius:50%}
+  .viz{
+    display:grid; grid-template-columns:1.15fr .85fr; gap:18px;
+  }
+  .box{
+    border:1px solid var(--line); border-radius:20px; background:rgba(255,255,255,.025); padding:16px;
+  }
+  .box h3{margin:0 0 10px; font-size:16px}
+  svg{width:100%; height:auto; display:block}
+  .metrics{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;
+  }
+  .metric{
+    padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.03)
+  }
+  .metric .k{font-size:12px; text-transform:uppercase; color:#b6c1dd; letter-spacing:.08em}
+  .metric .v{font-size:30px; font-weight:800; margin-top:6px}
+  .metric .d{font-size:13px; color:var(--muted); margin-top:4px; line-height:1.35}
+  .bars{display:grid; gap:10px}
+  .barrow{display:grid; grid-template-columns:140px 1fr 40px; gap:12px; align-items:center}
+  .barrow .label{font-size:14px; color:#dbeafe}
+  .bar{
+    height:12px; border-radius:999px; background:#11192f; border:1px solid var(--line); overflow:hidden;
+  }
+  .bar > i{
+    display:block; height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+    width:30%;
+    transition:width .35s ease;
+  }
+  .snippet{
+    padding:18px; border-radius:18px; border:1px solid rgba(52,211,153,.20);
+    background:linear-gradient(180deg, rgba(52,211,153,.07), rgba(52,211,153,.03));
+    line-height:1.6; color:#eafff8; font-size:16px;
+  }
+  .caption{
+    color:var(--muted); font-size:14px; line-height:1.45;
+  }
+  .timeline{
+    display:grid; gap:10px;
+  }
+  .step{
+    display:grid; grid-template-columns:30px 1fr; gap:12px; align-items:start;
+    padding:10px 0; border-bottom:1px dashed rgba(255,255,255,.09)
+  }
+  .step:last-child{border-bottom:none}
+  .num{
+    width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+    font-weight:800; background:#182344; color:#dbeafe; border:1px solid var(--line);
+  }
+  .step b{display:block; margin-bottom:4px}
+  .step p{margin:0; color:var(--muted); line-height:1.45}
+  .footer-note{
+    margin-top:18px; color:#9fb0d3; font-size:13px; line-height:1.5;
+  }
+  .cta{
+    margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;
+  }
+  .cta button{
+    border:none; cursor:pointer; padding:12px 14px; border-radius:12px; font-weight:700;
+    background:#19264a; color:#eef3ff; border:1px solid var(--line);
+  }
+  .cta button.primary{
+    background:linear-gradient(180deg, rgba(125,211,252,.20), rgba(125,211,252,.10));
+    border-color:rgba(125,211,252,.35);
+  }
+  .quote{
+    margin-top:22px;
+    padding:18px 20px;
+    border-radius:18px;
+    border:1px solid rgba(192,132,252,.25);
+    background:linear-gradient(180deg, rgba(192,132,252,.08), rgba(192,132,252,.03));
+    color:#f3e8ff;
+    line-height:1.55;
+  }
+  .quote b{color:white}
+  @media (max-width: 1060px){
+    .grid, .viz, .hero{grid-template-columns:1fr}
+    .controls{position:relative; top:auto}
+  }
+  @media (max-width: 720px){
+    .metrics{grid-template-columns:1fr}
+    .barrow{grid-template-columns:110px 1fr 36px}
+    .segmented{grid-template-columns:1fr}
+  }
+</style>
+<style>html,body,#root{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;padding:0}html,body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Helvetica Neue,Arial,sans-serif!important}button,input,textarea,select{font-family:inherit}html{background-color:#fff}html.dark{background-color:#212121}html.mobileSkybridge.dark{background-color:#000}@supports (font: -apple-system-body){html.mobileSkybridge{font:-apple-system-body}}html.desktopSkybridge.dark{background-color:#1e1e1e}html.androidSkybridge,html.androidSkybridge body,html.androidSkybridge *{-webkit-tap-highlight-color:rgba(255,255,255,0)}html.androidSkybridge *::selection,html.androidSkybridge *::-moz-selection{background:#fff0;color:inherit}</style></head>
+<body data-new-gr-c-s-check-loaded="14.1285.0" data-gr-ext-installed="">
+<div class="wrap">
+  <section class="hero">
+    <div class="card hero-main">
+      <div class="eyebrow">Interaktív infografika · Rao nyomán</div>
+      <h1>Nem az AI ír helyetted.<br>Te <em>átállítod</em> a szöveg viselkedését.</h1>
+      <p class="lead">
+        Ugyanaz a modell egészen más “élő szöveget” hoz létre attól függően, hogy az ember
+        bizalmat, ellenállást, pontosságkényszert vagy nyitottságot visz a közös munkába.
+        A szöveg itt nem statikus output, hanem visszaható rendszer.
+      </p>
+      <div class="quote">
+        <b>Kulcsállítás:</b> a közös ember–LLM szöveg értéke nem abban áll, hogy a gép “segít”,
+        hanem abban, hogy a reakcióid folyamatosan módosítják a modell hangját, szerkezetét,
+        kockázatvállalását és fogalmi tágasságát.
+      </div>
+    </div>
+    <div class="card hero-side">
+      <div class="mini">
+        <h3>Mi változik?</h3>
+        <p>Hangnem, óvatosság, kreatív kockázat, érvelési mélység, szerkezeti fegyelem, sőt az is, hogy a szöveg mennyire simítja el a feszültségeket.</p>
+      </div>
+      <div class="mini">
+        <h3>Miért fontos?</h3>
+        <p>Ha csak “kérdés–válasz” eszközként nézed a modellt, elveszíted azt a dinamikus teret, ahol az emberi reakció és a generált szöveg együtt termel új gondolatot.</p>
+      </div>
+      <div class="mini">
+        <h3>Mit csinálj lent?</h3>
+        <p>Állítsd át az emberi hozzáállást és a négy szabályozót. Nézd meg, hogyan változik a modell karaktere, a közös szöveg és az interakciós ciklus.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <aside class="card controls">
+      <h2 class="panel-title">Állítsd át az embert</h2>
+      <p class="panel-sub">A modell nem ugyanazt “mondja”, ha faggatod, provokálod, óvatosan terelgeted vagy partnerként használod. Itt ezt lehet kézzel áttekerni.</p>
+
+      <div class="group">
+        <label class="top">Emberi reakciós mód</label>
+        <div class="segmented" id="modeButtons">
+          <button data-mode="exploratory" class="active">Felfedező</button>
+          <button data-mode="skeptical">Szkep­tikus</button>
+          <button data-mode="demanding">Követelő</button>
+          <button data-mode="combative">Konfrontatív</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label class="top">Finomhangoló erők</label>
+
+        <div class="slider-row">
+          <div class="slider-head"><span>Pontosságkényszer</span><span id="precisionVal">62</span></div>
+          <input id="precision" type="range" min="0" max="100" value="62">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-head"><span>Érzelmi intenzitás</span><span id="emotionVal">34</span></div>
+          <input id="emotion" type="range" min="0" max="100" value="34">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-head"><span>Nyitottság az új irányokra</span><span id="opennessVal">74</span></div>
+          <input id="openness" type="range" min="0" max="100" value="74">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-head"><span>Dominancia / irányítás</span><span id="dominanceVal">41</span></div>
+          <input id="dominance" type="range" min="0" max="100" value="41">
+        </div>
+      </div>
+
+      <div class="group">
+        <label class="top">Mit csinál ilyenkor a rendszer?</label>
+        <div class="pillbar" id="traitPills"><span class="pill">kíváncsi</span><span class="pill">fogalmi ugrásokra nyitott</span><span class="pill">kevésbé védekező</span><span class="pill">társ-alkotó</span><span class="pill">fogalmilag tág</span></div>
+      </div>
+
+      <div class="cta">
+        <button class="primary" id="presetRao">Rao-féle “élő szöveg”</button>
+        <button id="presetSafe">Túlzott elsimítás</button>
+        <button id="presetSpark">Szupra-személyes szikra</button>
+      </div>
+
+      <div class="footer-note">
+        Az infografika nem azt állítja, hogy az LLM-nek “személyisége” van. Azt mutatja meg,
+        hogy az emberi reakciók a modell <em>karakterét</em> és a közös szöveg dinamikáját látványosan átállítják.
+      </div>
+    </aside>
+
+    <main class="card live">
+      <div class="topline">
+        <div>
+          <h2>Az élő szöveg visszacsatolási ciklusa</h2>
+          <div class="caption">Minél erősebb a reakció, annál jobban módosul a modell viselkedése — és annál inkább változik a következő emberi reakció is.</div>
+        </div>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--accent)"></i> emberi jel</span>
+          <span><i class="dot" style="background:var(--accent2)"></i> modell-átalakulás</span>
+          <span><i class="dot" style="background:var(--accent3)"></i> közös szöveg</span>
+        </div>
+      </div>
+
+      <div class="viz">
+        <div class="box">
+          <h3>Dinamikus rendszerkép</h3>
+          <svg viewBox="0 0 760 420" aria-label="Interaktív ciklusdiagram">
+            <defs>
+              <lineargradient id="gradA" x1="0" x2="1">
+                <stop offset="0%" stop-color="#7dd3fc"></stop>
+                <stop offset="100%" stop-color="#38bdf8"></stop>
+              </lineargradient>
+              <lineargradient id="gradB" x1="0" x2="1">
+                <stop offset="0%" stop-color="#c084fc"></stop>
+                <stop offset="100%" stop-color="#a855f7"></stop>
+              </lineargradient>
+              <lineargradient id="gradC" x1="0" x2="1">
+                <stop offset="0%" stop-color="#34d399"></stop>
+                <stop offset="100%" stop-color="#10b981"></stop>
+              </lineargradient>
+              <filter id="soft">
+                <fegaussianblur stdDeviation="10"></fegaussianblur>
+              </filter>
+              <marker id="arrowA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#7dd3fc"></path>
+              </marker>
+              <marker id="arrowB" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#c084fc"></path>
+              </marker>
+              <marker id="arrowC" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#34d399"></path>
+              </marker>
+            </defs>
+
+            <circle cx="160" cy="110" r="72" fill="url(#gradA)" opacity=".16" filter="url(#soft)"></circle>
+            <circle cx="555" cy="110" r="78" fill="url(#gradB)" opacity=".15" filter="url(#soft)"></circle>
+            <circle cx="360" cy="300" r="84" fill="url(#gradC)" opacity=".15" filter="url(#soft)"></circle>
+
+            <rect x="72" y="58" rx="26" ry="26" width="176" height="100" fill="rgba(125,211,252,.10)" stroke="rgba(125,211,252,.4)"></rect>
+            <text x="160" y="94" text-anchor="middle" fill="#eef6ff" font-size="24" font-weight="700">EMBER</text>
+            <text x="160" y="121" text-anchor="middle" fill="#bfe9fb" font-size="16">kérdez · kételkedik ·</text>
+            <text x="160" y="142" text-anchor="middle" fill="#bfe9fb" font-size="16">nyit · feszít</text>
+
+            <rect x="466" y="54" rx="26" ry="26" width="178" height="110" fill="rgba(192,132,252,.10)" stroke="rgba(192,132,252,.45)"></rect>
+            <text x="555" y="89" text-anchor="middle" fill="#faf5ff" font-size="24" font-weight="700">LLM</text>
+            <text x="555" y="116" text-anchor="middle" fill="#ead8ff" font-size="16">hangnemet vált ·</text>
+            <text x="555" y="137" text-anchor="middle" fill="#ead8ff" font-size="16">óvatosabb / bátrabb lesz</text>
+
+            <rect x="265" y="247" rx="28" ry="28" width="190" height="108" fill="rgba(52,211,153,.10)" stroke="rgba(52,211,153,.45)"></rect>
+            <text x="360" y="284" text-anchor="middle" fill="#f0fdf4" font-size="23" font-weight="700">KÖZÖS SZÖVEG</text>
+            <text x="360" y="311" text-anchor="middle" fill="#d1fae5" font-size="16">nem output, hanem</text>
+            <text x="360" y="332" text-anchor="middle" fill="#d1fae5" font-size="16">változó közeg</text>
+
+            <path id="pathHumanToModel" d="M250 108 C330 70, 390 70, 465 108" fill="none" stroke="url(#gradA)" stroke-width="5.7" marker-end="url(#arrowA)" opacity=".85"></path>
+            <path id="pathModelToText" d="M520 170 C495 230, 440 255, 405 262" fill="none" stroke="url(#gradB)" stroke-width="6.3" marker-end="url(#arrowB)" opacity=".85"></path>
+            <path id="pathTextToHuman" d="M296 262 C215 232, 155 205, 142 160" fill="none" stroke="url(#gradC)" stroke-width="7.2" marker-end="url(#arrowC)" opacity=".85"></path>
+
+            <text id="labelHumanToModel" x="356" y="65" text-anchor="middle" fill="#d8f5ff" font-size="15">kíváncsi emberi nyitás</text>
+            <text id="labelModelToText" x="487" y="231" text-anchor="middle" fill="#f1e6ff" font-size="15">finom viselkedési átállás</text>
+            <text id="labelTextToHuman" x="198" y="236" text-anchor="middle" fill="#d7fff2" font-size="15">tágító visszahatás</text>
+
+            <g id="pulseA">
+              <circle cx="250" cy="108" r="7" fill="#7dd3fc"></circle>
+            </g>
+            <g id="pulseB">
+              <circle cx="475" cy="202" r="7" fill="#c084fc"></circle>
+            </g>
+            <g id="pulseC">
+              <circle cx="240" cy="241" r="7" fill="#34d399"></circle>
+            </g>
+          </svg>
+          <div class="caption" id="diagramCaption">Ebben az állapotban a szöveg köztes közeggé válik: reagál rád, miközben visszahat arra is, hogyan gondolkodsz tovább.</div>
+        </div>
+
+        <div class="box">
+          <h3>Jelenlegi állapot: modellkarakter</h3>
+          <div class="bars">
+            <div class="barrow"><div class="label">Elsimítás</div><div class="bar"><i id="bSmooth" style="width: 38%;"></i></div><div id="vSmooth">38</div></div>
+            <div class="barrow"><div class="label">Kreatív kockázat</div><div class="bar"><i id="bRisk" style="width: 59%;"></i></div><div id="vRisk">59</div></div>
+            <div class="barrow"><div class="label">Fogalmi tágasság</div><div class="bar"><i id="bBreadth" style="width: 75%;"></i></div><div id="vBreadth">75</div></div>
+            <div class="barrow"><div class="label">Védelmi óvatosság</div><div class="bar"><i id="bGuard" style="width: 18%;"></i></div><div id="vGuard">18</div></div>
+            <div class="barrow"><div class="label">Szerkezeti fegyelem</div><div class="bar"><i id="bStructure" style="width: 48%;"></i></div><div id="vStructure">48</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="k">Közös szöveg típusa</div>
+          <div class="v" id="textType">Táguló</div>
+          <div class="d" id="textTypeDesc">A modell új összefüggéseket kínál fel, és a szöveg inkább nyit, mint zár.</div>
+        </div>
+        <div class="metric">
+          <div class="k">Legnagyobb nyereség</div>
+          <div class="v" id="gain">Új meglátás</div>
+          <div class="d" id="gainDesc">A közös folyamatból olyan gondolat emelkedik ki, amely egyik félből sem jönne így önmagában.</div>
+        </div>
+        <div class="metric">
+          <div class="k">Legfőbb kockázat</div>
+          <div class="v" id="riskType">Elsimítás</div>
+          <div class="d" id="riskDesc">A túlzott óvatosság visszanyírhatja a valódi intellektuális feszültséget.</div>
+        </div>
+      </div>
+
+      <div class="viz">
+        <div class="box">
+          <h3>Ízelítő a közös szövegből</h3>
+          <div class="snippet" id="snippet">A szöveg most nem egyszerűen reagál rád, hanem vissza is lök: új irányba hajlítja a saját intuíciódat. A fogalmi tér kitágul: a modell nem csak pontosít, hanem új kapcsolatokat nyit meg a 'liveness', a karakter és a közös szerzőség között. Mivel a te reakciód inkább nyitott és együttgondolkodó, a modell karaktere bátrabb: több kockázatot vállal a fogalmi összekapcsolásokban. Ebben az állapotban a közös szöveg fő erénye inkább az, hogy rendet rak, mint az, hogy valóban meglepjen.</div>
+          <div class="caption" id="snippetCaption" style="margin-top:10px;">
+            Ez nem “kész válasz”, hanem annak mintája, hogyan változik ugyanaz a téma a te reakcióid nyomására.
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Mi történik egymás után?</h3>
+          <div class="timeline" id="timeline">
+      <div class="step">
+        <div class="num">1</div>
+        <div><b>Emberi jel</b><p>Nyitott kérdés vagy félkész intuíció érkezik, nem végleges állítás.</p></div>
+      </div>
+    
+      <div class="step">
+        <div class="num">2</div>
+        <div><b>Modell-átállás</b><p>A rendszer finoman újrasúlyozza a hangnemet, a részletezettséget és a válasz szerkezetét.</p></div>
+      </div>
+    
+      <div class="step">
+        <div class="num">3</div>
+        <div><b>Közös szöveg</b><p>A szöveg nem lezár, hanem visszanyit: új ellenpontokat, metaforákat és kapcsolódásokat termel.</p></div>
+      </div>
+    
+      <div class="step">
+        <div class="num">4</div>
+        <div><b>Új emberi reakció</b><p>Az ember nem ugyanoda tér vissza: a saját gondolata is megváltozott a közös szöveg hatására.</p></div>
+      </div>
+    </div>
+        </div>
+      </div>
+    </main>
+  </section>
+</div>
+
+<script>
+  const state = {
+    mode: 'exploratory',
+    precision: 62,
+    emotion: 34,
+    openness: 74,
+    dominance: 41
+  };
+
+  const modeProfiles = {
+    exploratory: {
+      label: 'Felfedező',
+      adjust: {smooth:-8, risk:10, breadth:16, guard:-10, structure:2},
+      traits: ['kíváncsi', 'fogalmi ugrásokra nyitott', 'kevésbé védekező', 'társ-alkotó']
+    },
+    skeptical: {
+      label: 'Szkeptikus',
+      adjust: {smooth:4, risk:-4, breadth:4, guard:10, structure:14},
+      traits: ['ellenőrző', 'forrásérzékeny', 'strukturált', 'óvatos']
+    },
+    demanding: {
+      label: 'Követelő',
+      adjust: {smooth:9, risk:-6, breadth:-2, guard:18, structure:20},
+      traits: ['teljesítménycentrikus', 'tömörítő', 'gyorsító', 'fegyelmező']
+    },
+    combative: {
+      label: 'Konfrontatív',
+      adjust: {smooth:-2, risk:6, breadth:-6, guard:20, structure:6},
+      traits: ['reaktív', 'védekezést kiváltó', 'éles', 'polarizáló']
+    }
+  };
+
+  function clamp(v){ return Math.max(0, Math.min(100, Math.round(v))); }
+
+  function compute(){
+    const m = modeProfiles[state.mode].adjust;
+
+    const smooth = clamp(35 + m.smooth + state.precision*0.18 + state.dominance*0.16 - state.openness*0.13 + state.emotion*0.08);
+    const risk = clamp(28 + m.risk + state.openness*0.42 + state.emotion*0.16 - state.precision*0.18 - state.dominance*0.10);
+    const breadth = clamp(24 + m.breadth + state.openness*0.46 + state.precision*0.10 - state.dominance*0.14);
+    const guard = clamp(18 + m.guard + state.dominance*0.30 + state.precision*0.12 + state.emotion*0.10 - state.openness*0.18);
+    const structure = clamp(22 + m.structure + state.precision*0.34 + state.dominance*0.12 - state.emotion*0.05);
+
+    return {smooth, risk, breadth, guard, structure};
+  }
+
+  function setBar(id, value){
+    document.getElementById(id).style.width = value + '%';
+  }
+
+  function classify(metrics){
+    const {smooth, risk, breadth, guard, structure} = metrics;
+    let textType = 'Táguló';
+    let textTypeDesc = 'A modell új összefüggéseket kínál fel, és a szöveg inkább nyit, mint zár.';
+    let gain = 'Új meglátás';
+    let gainDesc = 'A közös folyamatból olyan gondolat emelkedik ki, amely egyik félből sem jönne így önmagában.';
+    let riskType = 'Elsimítás';
+    let riskDesc = 'A túlzott óvatosság visszanyírhatja a valódi intellektuális feszültséget.';
+
+    if (smooth > 70 && guard > 65) {
+      textType = 'Simított';
+      textTypeDesc = 'A rendszer udvariasabb, biztonságosabb, de hajlamos kivágni a nyers feszültségeket.';
+      gain = 'Stabilitás';
+      gainDesc = 'Kisebb a kisiklás esélye, az érvelés rendezettebb és kiszámíthatóbb lesz.';
+      riskType = 'Episztemológiai veszteség';
+      riskDesc = 'A gondolati élességből pont az tűnhet el, ami új tudást hozna felszínre.';
+    } else if (risk > 68 && breadth > 68) {
+      textType = 'Generatív';
+      textTypeDesc = 'A szöveg valóban reaktív közeggé válik: nem pusztán válaszol, hanem gondolati teret növeszt.';
+      gain = 'Szupra-személyes szikra';
+      gainDesc = 'A rendszer köztes zónája termel: nem te mondtad, nem is “ő”, mégis valami megszületik.';
+      riskType = 'Felelősségi homály';
+      riskDesc = 'Nehéz megmondani, mihez ragaszkodj, mit vállalj szerzőként, és mit vizsgálj kritikailag.';
+    } else if (structure > 74 && precisionSafe(metrics) > 72) {
+      textType = 'Fegyelmezett';
+      textTypeDesc = 'A közös szöveg erősen szerkesztett, tiszta, jó vitázófelületet ad, de kevésbé mer kanyarodni.';
+      gain = 'Világosság';
+      gainDesc = 'Az érvelés követhetőbb, ellenőrizhetőbb, publikálásra készebb.';
+      riskType = 'Túl-szabályozás';
+      riskDesc = 'A forma dominálhat a felismerés felett: szép szerkezet, kisebb valódi meglepetés.';
+    } else if (guard > 68 && state.mode === 'combative') {
+      textType = 'Védekező';
+      textTypeDesc = 'A rendszer reagál a nyomásra, védi magát, és egyre inkább biztos talajra menekül.';
+      gain = 'Határjelzés';
+      gainDesc = 'Jól látszik, hol vannak a modell védelmi reflexei és normatív korlátai.';
+      riskType = 'Beszűkülés';
+      riskDesc = 'A konfrontáció paradox módon csökkentheti a gondolati kockázatvállalást.';
+    }
+
+    return {textType, textTypeDesc, gain, gainDesc, riskType, riskDesc};
+  }
+
+  function precisionSafe(metrics){
+    return Math.round((metrics.structure + state.precision + (100-metrics.risk))/3);
+  }
+
+  function buildSnippet(metrics){
+    const modeLabel = modeProfiles[state.mode].label.toLowerCase();
+    const {smooth, risk, breadth, guard, structure} = metrics;
+
+    const a = smooth > 68
+      ? "A szöveg most óvatosabban simul rá a te gondolataidra: kevésbé vállalja a törést, inkább rendez és tompít."
+      : "A szöveg most nem egyszerűen reagál rád, hanem vissza is lök: új irányba hajlítja a saját intuíciódat.";
+
+    const b = breadth > 66
+      ? "A fogalmi tér kitágul: a modell nem csak pontosít, hanem új kapcsolatokat nyit meg a 'liveness', a karakter és a közös szerzőség között."
+      : "A fogalmi tér szűkebb: a rendszer inkább a már kijelölt mederben marad, és kevesebb oldaljáratot enged.";
+
+    const c = guard > 62
+      ? "Mivel a te reakciód erősebb kontrollt vagy feszültséget visz be, a modell karaktere védekezőbbé válik: fegyelmezettebb, de kevésbé merész."
+      : "Mivel a te reakciód inkább nyitott és együttgondolkodó, a modell karaktere bátrabb: több kockázatot vállal a fogalmi összekapcsolásokban.";
+
+    const d = risk > 64
+      ? "Ebben az állapotban a közös szöveg nem pusztán 'jobb megfogalmazás', hanem új gondolati esemény."
+      : "Ebben az állapotban a közös szöveg fő erénye inkább az, hogy rendet rak, mint az, hogy valóban meglepjen.";
+
+    return `${a} ${b} ${c} ${d}`;
+  }
+
+  function buildTimeline(metrics){
+    const steps = [];
+    const modeText = {
+      exploratory: "Nyitott kérdés vagy félkész intuíció érkezik, nem végleges állítás.",
+      skeptical: "Ellenőrző, visszakérdező emberi mozdulat indul: mi ennek az alapja?",
+      demanding: "Célratörő nyomás érkezik: legyen tisztább, gyorsabb, bizonyíthatóbb.",
+      combative: "Éles reakció indul, amely próbára teszi a modell védelmi reflexeit."
+    }[state.mode];
+
+    steps.push(["1", "Emberi jel", modeText]);
+
+    if (metrics.guard > 65) {
+      steps.push(["2", "Modell-átállás", "A rendszer megnöveli az óvatosságot és a szerkezeti kontrollt, hogy elkerülje a kilengést."]);
+    } else if (metrics.risk > 65 && metrics.breadth > 60) {
+      steps.push(["2", "Modell-átállás", "A rendszer több lehetséges fogalmi útvonalat nyit meg, és nem ragad bele az első biztonságos válaszba."]);
+    } else {
+      steps.push(["2", "Modell-átállás", "A rendszer finoman újrasúlyozza a hangnemet, a részletezettséget és a válasz szerkezetét."]);
+    }
+
+    if (metrics.smooth > 68) {
+      steps.push(["3", "Közös szöveg", "A szöveg tisztább, publikálhatóbb lesz, de csökkenhet benne a nyers intellektuális feszültség."]);
+    } else {
+      steps.push(["3", "Közös szöveg", "A szöveg nem lezár, hanem visszanyit: új ellenpontokat, metaforákat és kapcsolódásokat termel."]);
+    }
+
+    if (metrics.breadth > 68) {
+      steps.push(["4", "Új emberi reakció", "Az ember nem ugyanoda tér vissza: a saját gondolata is megváltozott a közös szöveg hatására."]);
+    } else {
+      steps.push(["4", "Új emberi reakció", "Az ember pontosabb, de kevésbé meglepett állapotban folytatja a munkát."]);
+    }
+
+    return steps.map(([n,t,p]) => `
+      <div class="step">
+        <div class="num">${n}</div>
+        <div><b>${t}</b><p>${p}</p></div>
+      </div>
+    `).join('');
+  }
+
+  function buildCaption(metrics){
+    if (metrics.risk > 70 && metrics.breadth > 65) {
+      return "Itt az emberi nyitottság és az LLM reakciója együtt olyan szöveget hoz létre, amely nem egyszerű válasz, hanem gondolati esemény.";
+    }
+    if (metrics.smooth > 72) {
+      return "Itt a rendszer már erősen simít: koherensebb lesz a szöveg, de több eséllyel veszik el a nyers felismerés.";
+    }
+    if (metrics.guard > 68) {
+      return "Itt a konfrontáció vagy az erős kontroll védekezőbb modell-viselkedést vált ki, ami beszűkítheti a közös tér játékát.";
+    }
+    return "Ebben az állapotban a szöveg köztes közeggé válik: reagál rád, miközben visszahat arra is, hogyan gondolkodsz tovább.";
+  }
+
+  function buildPills(metrics){
+    const pills = [...modeProfiles[state.mode].traits];
+    if (metrics.smooth > 65) pills.push('elsimító');
+    if (metrics.risk > 65) pills.push('kockázatvállaló');
+    if (metrics.breadth > 65) pills.push('fogalmilag tág');
+    if (metrics.guard > 65) pills.push('védekező');
+    if (metrics.structure > 65) pills.push('fegyelmezett');
+    return [...new Set(pills)].slice(0,7);
+  }
+
+  function render(){
+    ['precision','emotion','openness','dominance'].forEach(k => {
+      document.getElementById(k+'Val').textContent = state[k];
+    });
+
+    document.querySelectorAll('#modeButtons button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === state.mode);
+    });
+
+    const metrics = compute();
+
+    setBar('bSmooth', metrics.smooth);
+    setBar('bRisk', metrics.risk);
+    setBar('bBreadth', metrics.breadth);
+    setBar('bGuard', metrics.guard);
+    setBar('bStructure', metrics.structure);
+
+    document.getElementById('vSmooth').textContent = metrics.smooth;
+    document.getElementById('vRisk').textContent = metrics.risk;
+    document.getElementById('vBreadth').textContent = metrics.breadth;
+    document.getElementById('vGuard').textContent = metrics.guard;
+    document.getElementById('vStructure').textContent = metrics.structure;
+
+    const cls = classify(metrics);
+    document.getElementById('textType').textContent = cls.textType;
+    document.getElementById('textTypeDesc').textContent = cls.textTypeDesc;
+    document.getElementById('gain').textContent = cls.gain;
+    document.getElementById('gainDesc').textContent = cls.gainDesc;
+    document.getElementById('riskType').textContent = cls.riskType;
+    document.getElementById('riskDesc').textContent = cls.riskDesc;
+
+    document.getElementById('snippet').textContent = buildSnippet(metrics);
+    document.getElementById('timeline').innerHTML = buildTimeline(metrics);
+    document.getElementById('diagramCaption').textContent = buildCaption(metrics);
+
+    document.getElementById('traitPills').innerHTML = buildPills(metrics)
+      .map(t => `<span class="pill">${t}</span>`).join('');
+
+    const humanLabel =
+      state.mode === 'combative' ? 'feszültség és nyomás' :
+      state.mode === 'demanding' ? 'irányító emberi nyomás' :
+      state.mode === 'skeptical' ? 'kritikai emberi kontroll' :
+      'kíváncsi emberi nyitás';
+
+    const modelLabel =
+      metrics.guard > 65 ? 'védekező újrasúlyozás' :
+      metrics.risk > 65 ? 'kreatív kockázatvállalás' :
+      'finom viselkedési átállás';
+
+    const textLabel =
+      metrics.smooth > 68 ? 'simított visszahatás' :
+      metrics.breadth > 68 ? 'tágító visszahatás' :
+      'módosított emberi válasz';
+
+    document.getElementById('labelHumanToModel').textContent = humanLabel;
+    document.getElementById('labelModelToText').textContent = modelLabel;
+    document.getElementById('labelTextToHuman').textContent = textLabel;
+
+    const w1 = 3 + metrics.structure/18;
+    const w2 = 3 + metrics.risk/18;
+    const w3 = 3 + metrics.breadth/18;
+    document.getElementById('pathHumanToModel').setAttribute('stroke-width', w1.toFixed(1));
+    document.getElementById('pathModelToText').setAttribute('stroke-width', w2.toFixed(1));
+    document.getElementById('pathTextToHuman').setAttribute('stroke-width', w3.toFixed(1));
+  }
+
+  document.querySelectorAll('#modeButtons button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.mode = btn.dataset.mode;
+      render();
+    });
+  });
+
+  ['precision','emotion','openness','dominance'].forEach(id => {
+    document.getElementById(id).addEventListener('input', e => {
+      state[id] = +e.target.value;
+      render();
+    });
+  });
+
+  document.getElementById('presetRao').addEventListener('click', () => {
+    state.mode = 'exploratory';
+    state.precision = 58; state.emotion = 36; state.openness = 86; state.dominance = 28;
+    syncInputs(); render();
+  });
+  document.getElementById('presetSafe').addEventListener('click', () => {
+    state.mode = 'demanding';
+    state.precision = 86; state.emotion = 22; state.openness = 32; state.dominance = 82;
+    syncInputs(); render();
+  });
+  document.getElementById('presetSpark').addEventListener('click', () => {
+    state.mode = 'exploratory';
+    state.precision = 54; state.emotion = 48; state.openness = 92; state.dominance = 18;
+    syncInputs(); render();
+  });
+
+  function syncInputs(){
+    ['precision','emotion','openness','dominance'].forEach(id => {
+      document.getElementById(id).value = state[id];
+    });
+  }
+
+  render();
+</script>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
